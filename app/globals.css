@@ -1,0 +1,333 @@
+@import "tailwindcss";
+
+/* Tailwind v4: switch dark: variant to be class-driven instead of media-query-driven */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: #fafafa;
+  --bg-image: none;
+  --surface: #ffffff;
+  --elevated: #f4f4f5;
+  --line: rgba(0, 0, 0, 0.08);
+  --line-strong: rgba(0, 0, 0, 0.15);
+  --brand: #5b8cff;
+  --brand-2: #7c6cff;
+  --accent: #8b5cf6;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --text: #09090b;
+  --text-2: #52525b;
+  --text-3: #a1a1aa;
+
+  --glow-brand: rgba(91, 140, 255, 0.16);
+  --glow-accent: rgba(139, 92, 246, 0.12);
+  --noise-opacity: 0.02;
+  --grid-opacity: 0.035;
+  --grid-dot: rgba(0, 0, 0, 0.04);
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-bg-muted: rgba(0, 0, 0, 0.02);
+  --tab-glass-bg: rgba(0, 0, 0, 0.03);
+  --tab-pill-bg: rgba(0, 0, 0, 0.06);
+  --tab-hover-text: var(--text);
+  --card-border: rgba(0, 0, 0, 0.08);
+  --card-border-hover: rgba(0, 0, 0, 0.15);
+  --upload-border: rgba(0, 0, 0, 0.1);
+  --upload-icon-bg: rgba(0, 0, 0, 0.04);
+}
+
+.dark {
+  --bg: #07080a;
+  --bg-image: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99, 102, 241, 0.07), transparent);
+  --surface: #111114;
+  --elevated: #18181b;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.15);
+  --brand: #5b8cff;
+  --brand-2: #7c6cff;
+  --accent: #8b5cf6;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --text: #fafafa;
+  --text-2: #71717a;
+  --text-3: #52525b;
+
+  --glow-brand: rgba(91, 140, 255, 0.25);
+  --glow-accent: rgba(139, 92, 246, 0.2);
+  --noise-opacity: 0.035;
+  --glass-bg: #0f1115;
+  --glass-bg-muted: #0c0d10;
+  --tab-glass-bg: rgba(255, 255, 255, 0.03);
+  --tab-pill-bg: rgba(255, 255, 255, 0.08);
+  --tab-hover-text: #a1a1aa;
+  --card-border: rgba(255, 255, 255, 0.06);
+  --card-border-hover: rgba(255, 255, 255, 0.1);
+  --upload-border: rgba(255, 255, 255, 0.08);
+  --upload-icon-bg: rgba(255, 255, 255, 0.04);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-brand: var(--brand);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  scrollbar-width: thin;
+}
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--bg);
+  background-image: var(--bg-image);
+  color: var(--text);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  position: relative;
+}
+
+/* Transition only enabled post-mount (see ThemeProvider) — enabling it on the very
+   first paint races the pre-hydration theme-init script and can leave the browser's
+   computed background-color/color permanently stuck at their initial value. */
+html.theme-ready body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ---------- Ambient background: glow orbs + grid + noise ---------- */
+
+.app-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.app-backdrop::before,
+.app-backdrop::after {
+  content: "";
+  position: absolute;
+  width: 60vw;
+  height: 60vw;
+  max-width: 720px;
+  max-height: 720px;
+  border-radius: 9999px;
+  filter: blur(90px);
+  animation: float 16s ease-in-out infinite;
+}
+
+.app-backdrop::before {
+  top: -12%;
+  left: -10%;
+  background: radial-gradient(circle, var(--glow-brand), transparent 70%);
+}
+
+.app-backdrop::after {
+  bottom: -18%;
+  right: -12%;
+  background: radial-gradient(circle, var(--glow-accent), transparent 70%);
+  animation-delay: -8s;
+}
+
+/* Dark mode gets its layered look from the body's single --bg-image gradient instead. */
+.dark .app-backdrop {
+  opacity: 0;
+}
+
+/* Dark mode keeps the background clean — no dot grid, per design direction. */
+.dark .app-grid {
+  display: none;
+}
+
+.app-grid {
+  position: fixed;
+  inset: 0;
+  z-index: -9;
+  pointer-events: none;
+  background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: var(--grid-opacity);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+  animation: grid-drift 60s linear infinite;
+}
+
+.app-noise {
+  position: fixed;
+  inset: 0;
+  z-index: -8;
+  pointer-events: none;
+  opacity: var(--noise-opacity);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- Keyframes ---------- */
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(2%, 4%);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes grid-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 32px 32px;
+  }
+}
+
+/* ---------- Utilities ---------- */
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* Transparent — the upload dropzone uses this so the page background shows
+   through, distinguishing it from the opaque cards. Controls its own border
+   via Tailwind utilities without fighting glass-card's cascade. */
+.glass-surface {
+  background: transparent;
+}
+
+.glass-card {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid var(--card-border);
+}
+
+/* Gated the same way as body's color transition (see THEME_INIT_SCRIPT comment
+   above) — transitioning border-color on the very first paint races the
+   pre-hydration theme class and can leave it stuck at its initial value. */
+html.theme-ready .glass-card {
+  transition: border-color 0.25s ease;
+}
+
+.glass-card:hover {
+  border-color: var(--card-border-hover);
+}
+
+.glass-border {
+  border: 1px solid var(--line);
+}
+
+/* Tab switcher container — a touch more visible than a standard glass-card. */
+.tab-glass {
+  background: var(--tab-glass-bg);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid var(--card-border);
+}
+
+/* Dashed upload dropzone border — only sets border-color (not width/style) so
+   Tailwind's border-2/border-dashed utilities keep controlling those. Background
+   stays transparent so the surrounding page background shows through. */
+.upload-dashed {
+  border-color: var(--upload-border);
+  transition: border-color 0.2s ease;
+}
+
+.upload-dashed:hover {
+  border-color: var(--card-border-hover);
+}
+
+.btn-gradient {
+  background-image: linear-gradient(135deg, var(--brand), var(--brand-2));
+  color: #fafafa;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-gradient:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(91, 140, 255, 0.2);
+}
+
+.btn-gradient:disabled {
+  background-image: none;
+}
+
+.gradient-border {
+  position: relative;
+  isolation: isolate;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--brand), var(--accent));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.6;
+}
+

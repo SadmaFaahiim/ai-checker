@@ -491,3 +491,14 @@ This is a proof-of-concept, and the following constraints are intentional rather
 ## License
 
 Internal project — NeoNexor Software. Not licensed for external distribution.
+
+#Screenshots
+<img width="1920" height="1016" alt="Text-Human" src="https://github.com/user-attachments/assets/de3b73a5-b8ff-44a2-89d7-4ac80620f27f" />
+<img width="1920" height="1244" alt="Video-Human" src="https://github.com/user-attachments/assets/c528e21f-e5b3-4898-bddf-1c8d9e86591d" />
+<img width="1920" height="1244" alt="Video-AI" src="https://github.com/user-attachments/assets/843581c6-25e7-40ae-87be-e62b9e2b641d" />
+
+<img width="1920" height="1016" alt="Text-AI" src="https://github.com/user-attachments/assets/b904e749-89e9-4eea-bc16-b251c4cd287a" />
+<img width="1920" height="1016" alt="Text" src="https://github.com/user-attachments/assets/d819b70d-a2b9-4215-8279-3cd9ed8e41f9" />
+<img width="1920" height="1182" alt="Image" src="https://github.com/user-attachments/assets/6d084b36-18b7-47e2-84f4-8495530d62aa" />
+<img width="1920" height="1182" alt="Image -AI" src="https://github.com/user-attachments/assets/c430d0d2-6162-4342-8b7f-7bb62aeefbf7" />
+

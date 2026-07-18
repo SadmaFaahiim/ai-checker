@@ -49,7 +49,10 @@ function verdictStyles(percentage: number) {
   if (percentage < 35) {
     return {
       gradient: "linear-gradient(135deg, #22C55E, #4ADE80)",
-      badge: "bg-success/10 text-success",
+      textColor: "text-success",
+      badgeBg: "rgba(34,197,94,0.1)",
+      badgeBorder: "rgba(34,197,94,0.35)",
+      glowColor: "rgba(34,197,94,0.45)",
       dot: "bg-success",
       glow: "shadow-success/20",
     };
@@ -57,14 +60,20 @@ function verdictStyles(percentage: number) {
   if (percentage <= 65) {
     return {
       gradient: "linear-gradient(135deg, #F59E0B, #FBBF24)",
-      badge: "bg-warning/10 text-warning",
+      textColor: "text-warning",
+      badgeBg: "rgba(245,158,11,0.1)",
+      badgeBorder: "rgba(245,158,11,0.35)",
+      glowColor: "rgba(245,158,11,0.45)",
       dot: "bg-warning",
       glow: "shadow-warning/20",
     };
   }
   return {
     gradient: "linear-gradient(135deg, #EF4444, #F87171)",
-    badge: "bg-danger/10 text-danger",
+    textColor: "text-danger",
+    badgeBg: "rgba(239,68,68,0.1)",
+    badgeBorder: "rgba(239,68,68,0.35)",
+    glowColor: "rgba(239,68,68,0.45)",
     dot: "bg-danger",
     glow: "shadow-danger/20",
   };
@@ -81,52 +90,90 @@ export default function ResultCard({ percentage, verdict, provider, children }: 
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       whileHover={{ y: -2 }}
       className={clsx(
-        "glass-card w-full rounded-xl p-4 shadow-2xl shadow-black/20 sm:rounded-2xl sm:p-6 md:p-8",
+        "relative w-full rounded-xl border border-black/[0.08] bg-white p-5 shadow-lg backdrop-blur-xl transition-colors sm:rounded-2xl sm:p-8 dark:border-white/[0.08] dark:bg-white/[0.03] dark:shadow-2xl dark:shadow-black/20",
         styles.glow
       )}
     >
-      <div className="flex flex-col items-center gap-1 text-center">
-        <span
-          className="text-4xl font-bold tabular-nums sm:text-5xl md:text-6xl"
-          style={{
-            backgroundImage: styles.gradient,
-            WebkitBackgroundClip: "text",
-            backgroundClip: "text",
-            color: "transparent",
-          }}
-        >
-          {animatedPercentage}%
-        </span>
-        <span
-          className={clsx(
-            "mt-1 inline-flex items-center rounded-full px-3 py-1 text-sm font-medium",
-            styles.badge
-          )}
-        >
-          {verdict}
-        </span>
-      </div>
-
-      <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-elevated sm:mt-6 sm:h-3">
+      {/* Row 1 — percentage (left) / verdict badge (right), stacks on very small screens */}
+      <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
         <motion.div
-          className="h-full rounded-full"
-          style={{ backgroundImage: styles.gradient }}
-          initial={{ width: 0 }}
-          animate={{ width: `${animatedPercentage}%` }}
-          transition={{ type: "spring", stiffness: 120, damping: 20 }}
-        />
+          initial={{ opacity: 0, x: -16 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 26, delay: 0.05 }}
+        >
+          <span
+            className="text-4xl font-bold tabular-nums sm:text-5xl md:text-6xl"
+            style={{
+              backgroundImage: styles.gradient,
+              WebkitBackgroundClip: "text",
+              backgroundClip: "text",
+              color: "transparent",
+              textShadow: `0 0 28px ${styles.glowColor}`,
+            }}
+          >
+            {animatedPercentage}%
+          </span>
+          <p className="mt-1 text-[10px] font-medium uppercase tracking-wider text-text-3 sm:text-xs">
+            AI Probability Score
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 16, scale: 0.9 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 22, delay: 0.15 }}
+          className="flex flex-col items-center sm:items-end"
+        >
+          <span
+            className={clsx(
+              "inline-flex items-center rounded-full border px-3.5 py-1.5 text-sm font-semibold",
+              styles.textColor
+            )}
+            style={{ backgroundColor: styles.badgeBg, borderColor: styles.badgeBorder }}
+          >
+            {verdict}
+          </span>
+          <p className="mt-1 text-[10px] font-medium uppercase tracking-wider text-text-3 sm:text-xs">
+            Detection Verdict
+          </p>
+        </motion.div>
       </div>
 
-      <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-text-3">
-        <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" aria-hidden />
-        via <span className="font-medium capitalize text-text-2">{provider}</span>
-      </p>
+      {/* Row 2 — progress bar with percentage markers */}
+      <div className="mt-6 sm:mt-8">
+        <div className="progress-shimmer h-2.5 w-full overflow-hidden rounded-full bg-elevated backdrop-blur-sm sm:h-3">
+          <motion.div
+            className="h-full rounded-full"
+            style={{ backgroundImage: styles.gradient }}
+            initial={{ width: 0 }}
+            animate={{ width: `${animatedPercentage}%` }}
+            transition={{ type: "spring", stiffness: 120, damping: 20 }}
+          />
+        </div>
+        <div className="relative mt-1.5 h-3.5 text-[10px] text-text-3">
+          <span className="absolute left-0">0%</span>
+          <span className="absolute -translate-x-1/2" style={{ left: "35%" }}>
+            35%
+          </span>
+          <span className="absolute -translate-x-1/2" style={{ left: "65%" }}>
+            65%
+          </span>
+          <span className="absolute right-0">100%</span>
+        </div>
+      </div>
 
       {children && <div className="mt-5 sm:mt-6">{children}</div>}
 
-      <div className="mt-5 flex items-start gap-2 rounded-lg bg-elevated px-3 py-2.5 text-xs leading-relaxed text-text-3 sm:mt-6">
-        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
-        <span>This is a detection signal, not proof. Treat it as one input among several.</span>
+      {/* Row 3 — footer: provider attribution (left) / disclaimer (right) */}
+      <div className="mt-5 flex flex-col items-center gap-2 border-t border-line pt-4 text-center text-xs text-text-3 sm:mt-6 sm:flex-row sm:items-center sm:justify-between sm:text-left">
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" aria-hidden />
+          via <span className="font-medium capitalize text-text-2">{provider}</span>
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Info className="h-3 w-3 shrink-0" aria-hidden />
+          Detection signal, not proof.
+        </span>
       </div>
     </motion.div>
   );

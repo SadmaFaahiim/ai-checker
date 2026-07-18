@@ -6,12 +6,14 @@ import { ShieldCheck, Sparkles } from "lucide-react";
 import TabSwitcher, { type TabId } from "@/components/TabSwitcher";
 import TextCheckPanel from "@/components/TextCheckPanel";
 import ImageCheckPanel from "@/components/ImageCheckPanel";
+import AudioCheckPanel from "@/components/AudioCheckPanel";
 import VideoCheckPanel from "@/components/VideoCheckPanel";
 import ThemeToggle from "@/components/ThemeToggle";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "text", label: "Text" },
   { id: "image", label: "Image" },
+  { id: "audio", label: "Audio" },
   { id: "video", label: "Video" },
 ];
 
@@ -100,6 +102,11 @@ export default function Home() {
               {activeTab === "image" && (
                 <motion.div key="image" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, pointerEvents: "none" }}>
                   <ImageCheckPanel />
+                </motion.div>
+              )}
+              {activeTab === "audio" && (
+                <motion.div key="audio" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, pointerEvents: "none" }}>
+                  <AudioCheckPanel />
                 </motion.div>
               )}
               {activeTab === "video" && (

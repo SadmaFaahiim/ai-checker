@@ -253,6 +253,23 @@ html.theme-ready body {
   animation: shimmer 1.6s linear infinite;
 }
 
+/* Slower, brighter streak for the ResultCard progress-bar fill — distinct
+   from .shimmer (which is tuned for opaque loading-skeleton blocks) since
+   this one sits on top of a saturated color gradient. */
+.progress-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2.8s linear infinite;
+}
+
 /* Transparent — the upload dropzone uses this so the page background shows
    through, distinguishing it from the opaque cards. Controls its own border
    via Tailwind utilities without fighting glass-card's cascade. */

@@ -16,7 +16,8 @@ export interface DetectionResult {
 export type ProviderInput =
   | { kind: "text"; text: string }
   | { kind: "image"; buffer: Buffer; mimeType: string }
-  | { kind: "video-frame"; buffer: Buffer; mimeType: string };
+  | { kind: "video-frame"; buffer: Buffer; mimeType: string }
+  | { kind: "audio"; buffer: Buffer; mimeType: string };
 
 export interface Provider {
   name: string;

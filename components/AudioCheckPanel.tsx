@@ -1,0 +1,232 @@
+"use client";
+
+import { useCallback, useState } from "react";
+import { useDropzone, type FileRejection } from "react-dropzone";
+import toast from "react-hot-toast";
+import { AnimatePresence, motion } from "framer-motion";
+import { Music, X, Sparkles, Search } from "lucide-react";
+import ResultCard from "./ResultCard";
+import type { CheckResult } from "@/lib/scoring";
+
+const MAX_AUDIO_BYTES = 20 * 1024 * 1024; // 20MB
+
+function ResultSkeleton() {
+  return (
+    <motion.div
+      animate={{ opacity: [0.7, 1, 0.7] }}
+      transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+      className="glass-card shimmer w-full rounded-xl p-4 sm:rounded-2xl sm:p-6 md:p-8"
+    >
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-12 w-28 rounded-lg bg-elevated" />
+        <div className="h-6 w-40 rounded-full bg-elevated" />
+      </div>
+      <div className="mt-6 h-2.5 w-full rounded-full bg-elevated" />
+      <div className="mt-6 flex items-center justify-center gap-1 text-sm text-text-2">
+        <span>Analyzing audio</span>
+        <AnimatedDots />
+      </div>
+    </motion.div>
+  );
+}
+
+function AnimatedDots() {
+  return (
+    <span className="inline-flex gap-0.5">
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          animate={{ opacity: [0.2, 1, 0.2] }}
+          transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2, ease: "easeInOut" }}
+        >
+          .
+        </motion.span>
+      ))}
+    </span>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div
+      className="glass-card flex w-full flex-col items-center gap-3 rounded-xl px-4 py-10 text-center sm:rounded-2xl sm:px-6 sm:py-12"
+      style={{ background: "var(--glass-bg-muted)" }}
+    >
+      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-surface">
+        <Search className="h-5 w-5 text-text-3" aria-hidden />
+      </div>
+      <p className="text-sm text-text-2">Analysis results will appear here</p>
+    </div>
+  );
+}
+
+export default function AudioCheckPanel() {
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<CheckResult | null>(null);
+
+  const onDrop = useCallback((accepted: File[], rejections: FileRejection[]) => {
+    if (rejections.length > 0) {
+      const reason = rejections[0]?.errors[0]?.code;
+      if (reason === "file-too-large") {
+        toast.error("Audio must be smaller than 20MB.");
+      } else if (reason === "file-invalid-type") {
+        toast.error("Only MP3, WAV, M4A, OGG, FLAC, and WEBM audio are supported.");
+      } else {
+        toast.error("That file couldn't be used, please try another.");
+      }
+      return;
+    }
+
+    const picked = accepted[0];
+    if (picked) {
+      setFile(picked);
+      setResult(null);
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "audio/mpeg": [".mp3"],
+      "audio/wav": [".wav"],
+      "audio/mp4": [".m4a"],
+      "audio/ogg": [".ogg"],
+      "audio/flac": [".flac"],
+      "audio/webm": [".webm"],
+    },
+    maxSize: MAX_AUDIO_BYTES,
+    multiple: false,
+  });
+
+  const dropzoneRootProps = getRootProps();
+
+  function clearFile() {
+    setFile(null);
+    setResult(null);
+  }
+
+  async function handleCheck() {
+    if (!file || loading) return;
+
+    setLoading(true);
+    setResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("audio", file);
+
+      const res = await fetch("/api/check/audio", { method: "POST", body: formData });
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data?.error ?? "Something went wrong. Please try again.");
+        return;
+      }
+
+      setResult(data as CheckResult);
+    } catch {
+      toast.error("Network error — please check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <div className="relative">
+      <AnimatePresence mode="popLayout" initial={false}>
+        {!file ? (
+          <motion.div
+            key="dropzone"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, pointerEvents: "none" }}
+            whileHover={{ scale: 1.01 }}
+          >
+            <div
+              {...dropzoneRootProps}
+              className="glass-surface upload-dashed flex cursor-pointer flex-col items-center justify-center gap-2.5 rounded-xl border-2 border-dashed px-4 py-8 text-center sm:gap-3 sm:rounded-2xl sm:px-6 sm:py-12"
+              style={isDragActive ? { borderColor: "var(--card-border-hover)" } : undefined}
+            >
+              <input {...getInputProps()} />
+              <div
+                className="animate-float flex h-10 w-10 items-center justify-center rounded-full sm:h-12 sm:w-12"
+                style={{ background: "var(--upload-icon-bg)" }}
+              >
+                <Music className="h-5 w-5 text-brand sm:h-6 sm:w-6" aria-hidden />
+              </div>
+              <p className="text-xs text-text-2 sm:text-sm">Drag & drop an audio file, or click to browse</p>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="glass-border rounded-md bg-elevated/60 px-2 py-0.5 text-xs font-medium text-text-3 sm:px-2.5 sm:py-1">MP3</span>
+                <span className="glass-border rounded-md bg-elevated/60 px-2 py-0.5 text-xs font-medium text-text-3 sm:px-2.5 sm:py-1">WAV</span>
+                <span className="glass-border rounded-md bg-elevated/60 px-2 py-0.5 text-xs font-medium text-text-3 sm:px-2.5 sm:py-1">M4A</span>
+                <span className="glass-border rounded-md bg-elevated/60 px-2 py-0.5 text-xs font-medium text-text-3 sm:px-2.5 sm:py-1">OGG</span>
+              </div>
+              <p className="text-xs text-text-3">Max size 20MB</p>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="file"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, pointerEvents: "none" }}
+            className="glass-card flex items-center gap-3 rounded-xl p-3 sm:gap-4 sm:rounded-2xl sm:p-4"
+          >
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-elevated sm:h-16 sm:w-16">
+              <Music className="h-6 w-6 text-brand" aria-hidden />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="flex items-center gap-1.5 truncate text-sm font-medium text-text">
+                <Music className="h-3.5 w-3.5 shrink-0 text-text-3" aria-hidden />
+                {file.name}
+              </p>
+              <p className="text-xs text-text-3">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+            </div>
+            <button
+              type="button"
+              onClick={clearFile}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-text-3 transition-colors hover:bg-elevated hover:text-text"
+              aria-label="Remove audio"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      </div>
+
+      <motion.button
+        type="button"
+        onClick={handleCheck}
+        disabled={!file || loading}
+        whileTap={file && !loading ? { scale: 0.98 } : undefined}
+        className="btn-gradient inline-flex w-full min-h-11 items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm shadow-lg shadow-brand/20 outline-none focus-visible:ring-2 focus-visible:ring-brand/50 disabled:cursor-not-allowed disabled:bg-elevated disabled:text-text-3 disabled:shadow-none disabled:opacity-60 sm:w-auto sm:self-end"
+      >
+        <Sparkles className="h-4 w-4" aria-hidden />
+        {loading ? "Analyzing..." : "Check Audio"}
+      </motion.button>
+
+      <div className="relative">
+      <AnimatePresence mode="popLayout">
+        {loading && (
+          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, pointerEvents: "none" }}>
+            <ResultSkeleton />
+          </motion.div>
+        )}
+        {!loading && result && (
+          <motion.div key="result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, pointerEvents: "none" }}>
+            <ResultCard percentage={result.percentage} verdict={result.verdict} provider={result.provider} />
+          </motion.div>
+        )}
+        {!loading && !result && (
+          <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, pointerEvents: "none" }}>
+            <EmptyState />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      </div>
+    </div>
+  );
+}

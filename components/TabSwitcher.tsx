@@ -1,10 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Type, Image as ImageIcon, Video, type LucideIcon } from "lucide-react";
+import { Type, Image as ImageIcon, Music, Video, type LucideIcon } from "lucide-react";
 import clsx from "clsx";
 
-export type TabId = "text" | "image" | "video";
+export type TabId = "text" | "image" | "audio" | "video";
 
 export interface TabDefinition {
   id: TabId;
@@ -20,6 +20,7 @@ interface TabSwitcherProps {
 const TAB_ICONS: Record<TabId, LucideIcon> = {
   text: Type,
   image: ImageIcon,
+  audio: Music,
   video: Video,
 };
 

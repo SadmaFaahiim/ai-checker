@@ -11,7 +11,7 @@ const MIN_CHARS = 20;
 
 function ResultSkeleton() {
   return (
-    <div className="glass-card shimmer w-full rounded-2xl p-6 sm:p-8">
+    <div className="glass-card shimmer w-full rounded-xl p-4 sm:rounded-2xl sm:p-6 md:p-8">
       <div className="flex flex-col items-center gap-3">
         <div className="h-12 w-28 rounded-lg bg-elevated" />
         <div className="h-6 w-40 rounded-full bg-elevated" />
@@ -25,7 +25,7 @@ function ResultSkeleton() {
 function EmptyState() {
   return (
     <div
-      className="glass-card flex w-full flex-col items-center gap-3 rounded-2xl px-6 py-12 text-center"
+      className="glass-card flex w-full flex-col items-center gap-3 rounded-xl px-4 py-10 text-center sm:rounded-2xl sm:px-6 sm:py-12"
       style={{ background: "var(--glass-bg-muted)" }}
     >
       <div className="flex h-11 w-11 items-center justify-center rounded-full bg-surface">
@@ -73,18 +73,18 @@ export default function TextCheckPanel() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="glass-card rounded-2xl p-4 sm:p-5">
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <div className="glass-card rounded-xl p-4 sm:rounded-2xl sm:p-5">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Paste or type text here..."
           rows={8}
-          className="w-full resize-y bg-transparent text-sm text-text placeholder:text-text-3 outline-none sm:text-base"
+          className="min-h-30 w-full resize-y bg-transparent text-sm text-text placeholder:text-text-3 outline-none sm:min-h-40 sm:text-base"
         />
-        <div className="mt-3 flex items-center justify-between border-t border-line pt-3 text-xs text-text-3">
+        <div className="mt-3 flex items-center justify-between gap-2 border-t border-line pt-3 text-xs text-text-3">
           <span>{trimmedLength < MIN_CHARS ? `At least ${MIN_CHARS} characters required` : " "}</span>
-          <span className="tabular-nums">{text.length.toLocaleString()} chars</span>
+          <span className="shrink-0 tabular-nums">{text.length.toLocaleString()} chars</span>
         </div>
       </div>
 
@@ -93,7 +93,7 @@ export default function TextCheckPanel() {
         onClick={handleCheck}
         disabled={!canSubmit}
         whileTap={canSubmit ? { scale: 0.98 } : undefined}
-        className="btn-gradient inline-flex items-center justify-center gap-2 self-end rounded-lg px-5 py-2.5 text-sm shadow-lg shadow-brand/20 outline-none focus-visible:ring-2 focus-visible:ring-brand/50 disabled:cursor-not-allowed disabled:bg-elevated disabled:text-text-3 disabled:shadow-none disabled:opacity-60"
+        className="btn-gradient inline-flex w-full min-h-11 items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm shadow-lg shadow-brand/20 outline-none focus-visible:ring-2 focus-visible:ring-brand/50 disabled:cursor-not-allowed disabled:bg-elevated disabled:text-text-3 disabled:shadow-none disabled:opacity-60 sm:w-auto sm:self-end"
       >
         <Sparkles className="h-4 w-4" aria-hidden />
         {loading ? "Analyzing..." : "Check Text"}

@@ -41,12 +41,12 @@ export default function Home() {
         <ThemeToggle />
       </div>
 
-      <main className="w-full max-w-2xl flex-1 px-4 py-14 sm:px-6 sm:py-20">
+      <main className="w-full max-w-2xl flex-1 px-4 py-10 sm:px-6 sm:py-14 lg:py-20">
         <motion.header
           variants={container}
           initial="hidden"
           animate="show"
-          className="mb-12 flex flex-col items-center gap-5 text-center sm:mb-16"
+          className="mb-8 flex flex-col items-center gap-4 text-center sm:mb-12 sm:gap-5 lg:mb-16"
         >
           <motion.div
             variants={item}
@@ -54,30 +54,30 @@ export default function Home() {
               background: "var(--glass-bg)",
               borderColor: "rgba(99,102,241,0.2)",
             }}
-            className="mb-2 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium text-brand backdrop-blur-xl"
+            className="mb-2 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium text-brand backdrop-blur-xl sm:px-3.5 sm:py-1.5"
           >
-            <Sparkles className="h-3.5 w-3.5" aria-hidden />
-            AI-Powered Detection
+            <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            <span className="whitespace-nowrap">AI-Powered Detection</span>
           </motion.div>
 
-          <motion.div variants={item} className="relative flex flex-col items-center gap-4">
-            <div className="relative flex h-16 w-16 items-center justify-center">
+          <motion.div variants={item} className="relative flex flex-col items-center gap-3 sm:gap-4">
+            <div className="relative flex h-12 w-12 items-center justify-center sm:h-16 sm:w-16">
               <div
                 className="absolute inset-0 rounded-full"
                 style={{ boxShadow: "0 0 0 8px rgba(99,102,241,0.08)" }}
                 aria-hidden
               />
-              <div className="gradient-border glass-card relative flex h-16 w-16 items-center justify-center rounded-2xl">
-                <ShieldCheck className="h-7 w-7 text-brand" aria-hidden />
+              <div className="gradient-border glass-card relative flex h-12 w-12 items-center justify-center rounded-xl sm:h-16 sm:w-16 sm:rounded-2xl">
+                <ShieldCheck className="h-5 w-5 text-brand sm:h-7 sm:w-7" aria-hidden />
               </div>
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight text-text md:text-5xl">
+            <h1 className="text-2xl font-bold tracking-tight text-text sm:text-3xl md:text-4xl lg:text-5xl">
               AI-Checker
             </h1>
           </motion.div>
 
-          <motion.p variants={item} className="max-w-md text-lg leading-relaxed text-text-2">
+          <motion.p variants={item} className="max-w-md px-2 text-sm leading-relaxed text-text-2 sm:text-base lg:text-lg">
             Paste text, or upload an image or video, to get a likelihood signal for
             whether it&apos;s AI-generated.
           </motion.p>
@@ -90,7 +90,7 @@ export default function Home() {
         >
           <TabSwitcher tabs={TABS} activeTab={activeTab} onChange={setActiveTab} />
 
-          <div className="relative mt-8">
+          <div className="relative mt-6 sm:mt-8">
             <AnimatePresence mode="popLayout" initial={false}>
               {activeTab === "text" && (
                 <motion.div key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, pointerEvents: "none" }}>
@@ -110,7 +110,7 @@ export default function Home() {
             </AnimatePresence>
           </div>
 
-          <p className="mt-10 border-t border-line pt-5 text-center text-xs leading-relaxed text-text-3 opacity-80">
+          <p className="mt-8 border-t border-line pt-5 text-center text-xs leading-relaxed text-text-3 opacity-80 sm:mt-10">
             Results are provided by third-party detection APIs and may not always be accurate.
           </p>
         </motion.div>

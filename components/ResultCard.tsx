@@ -81,13 +81,13 @@ export default function ResultCard({ percentage, verdict, provider, children }: 
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       whileHover={{ y: -2 }}
       className={clsx(
-        "glass-card w-full rounded-2xl p-6 shadow-2xl shadow-black/20 sm:p-8",
+        "glass-card w-full rounded-xl p-4 shadow-2xl shadow-black/20 sm:rounded-2xl sm:p-6 md:p-8",
         styles.glow
       )}
     >
       <div className="flex flex-col items-center gap-1 text-center">
         <span
-          className="text-5xl font-bold tabular-nums sm:text-6xl"
+          className="text-4xl font-bold tabular-nums sm:text-5xl md:text-6xl"
           style={{
             backgroundImage: styles.gradient,
             WebkitBackgroundClip: "text",
@@ -107,7 +107,7 @@ export default function ResultCard({ percentage, verdict, provider, children }: 
         </span>
       </div>
 
-      <div className="mt-6 h-2.5 w-full overflow-hidden rounded-full bg-elevated">
+      <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-elevated sm:mt-6 sm:h-3">
         <motion.div
           className="h-full rounded-full"
           style={{ backgroundImage: styles.gradient }}
@@ -122,9 +122,9 @@ export default function ResultCard({ percentage, verdict, provider, children }: 
         via <span className="font-medium capitalize text-text-2">{provider}</span>
       </p>
 
-      {children && <div className="mt-6">{children}</div>}
+      {children && <div className="mt-5 sm:mt-6">{children}</div>}
 
-      <div className="mt-6 flex items-start gap-2 rounded-lg bg-elevated px-3 py-2.5 text-xs leading-relaxed text-text-3">
+      <div className="mt-5 flex items-start gap-2 rounded-lg bg-elevated px-3 py-2.5 text-xs leading-relaxed text-text-3 sm:mt-6">
         <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
         <span>This is a detection signal, not proof. Treat it as one input among several.</span>
       </div>

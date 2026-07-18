@@ -97,12 +97,20 @@ html.dark {
   color-scheme: dark;
 }
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   background-color: var(--bg);
   background-image: var(--bg-image);
   color: var(--text);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   position: relative;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 /* Transition only enabled post-mount (see ThemeProvider) — enabling it on the very

@@ -17,7 +17,7 @@ function ResultSkeleton() {
     <motion.div
       animate={{ opacity: [0.7, 1, 0.7] }}
       transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-      className="glass-card shimmer w-full rounded-2xl p-6 sm:p-8"
+      className="glass-card shimmer w-full rounded-xl p-4 sm:rounded-2xl sm:p-6 md:p-8"
     >
       <div className="flex flex-col items-center gap-3">
         <div className="h-12 w-28 rounded-lg bg-elevated" />
@@ -52,7 +52,7 @@ function AnimatedDots() {
 function EmptyState() {
   return (
     <div
-      className="glass-card flex w-full flex-col items-center gap-3 rounded-2xl px-6 py-12 text-center"
+      className="glass-card flex w-full flex-col items-center gap-3 rounded-xl px-4 py-10 text-center sm:rounded-2xl sm:px-6 sm:py-12"
       style={{ background: "var(--glass-bg-muted)" }}
     >
       <div className="flex h-11 w-11 items-center justify-center rounded-full bg-surface">
@@ -167,7 +167,7 @@ export default function VideoCheckPanel() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 sm:gap-6">
       <div className="relative">
       <AnimatePresence mode="popLayout" initial={false}>
         {!file ? (
@@ -180,19 +180,19 @@ export default function VideoCheckPanel() {
           >
             <div
               {...dropzoneRootProps}
-              className="glass-surface upload-dashed flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-6 py-14 text-center"
+              className="glass-surface upload-dashed flex cursor-pointer flex-col items-center justify-center gap-2.5 rounded-xl border-2 border-dashed px-4 py-8 text-center sm:gap-3 sm:rounded-2xl sm:px-6 sm:py-12"
               style={isDragActive ? { borderColor: "var(--card-border-hover)" } : undefined}
             >
               <input {...getInputProps()} />
               <div
-                className="animate-float flex h-12 w-12 items-center justify-center rounded-full"
+                className="animate-float flex h-10 w-10 items-center justify-center rounded-full sm:h-12 sm:w-12"
                 style={{ background: "var(--upload-icon-bg)" }}
               >
-                <UploadCloud className="h-6 w-6 text-brand" aria-hidden />
+                <UploadCloud className="h-5 w-5 text-brand sm:h-6 sm:w-6" aria-hidden />
               </div>
-              <p className="text-sm text-text-2">Drag & drop an MP4, or click to browse</p>
-              <div className="flex items-center gap-2">
-                <span className="glass-border rounded-md bg-elevated/60 px-2.5 py-1 text-xs font-medium text-text-3">MP4</span>
+              <p className="text-xs text-text-2 sm:text-sm">Drag & drop an MP4, or click to browse</p>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="glass-border rounded-md bg-elevated/60 px-2 py-0.5 text-xs font-medium text-text-3 sm:px-2.5 sm:py-1">MP4</span>
               </div>
               <p className="text-xs text-text-3">Max size 20MB · MP4 only</p>
             </div>
@@ -203,10 +203,10 @@ export default function VideoCheckPanel() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, pointerEvents: "none" }}
-            className="glass-card flex items-center gap-4 rounded-2xl p-4"
+            className="glass-card flex items-center gap-3 rounded-xl p-3 sm:gap-4 sm:rounded-2xl sm:p-4"
           >
             {previewUrl && (
-              <video src={previewUrl} className="h-16 w-16 shrink-0 rounded-xl object-cover" muted />
+              <video src={previewUrl} className="h-14 w-14 shrink-0 rounded-xl object-cover sm:h-16 sm:w-16" muted />
             )}
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-1.5 truncate text-sm font-medium text-text">
@@ -218,7 +218,7 @@ export default function VideoCheckPanel() {
             <button
               type="button"
               onClick={clearFile}
-              className="rounded-full p-1.5 text-text-3 transition-colors hover:bg-elevated hover:text-text"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-text-3 transition-colors hover:bg-elevated hover:text-text"
               aria-label="Remove video"
             >
               <X className="h-4 w-4" />
@@ -233,7 +233,7 @@ export default function VideoCheckPanel() {
         onClick={handleCheck}
         disabled={!file || loading}
         whileTap={file && !loading ? { scale: 0.98 } : undefined}
-        className="btn-gradient inline-flex items-center justify-center gap-2 self-end rounded-lg px-5 py-2.5 text-sm shadow-lg shadow-brand/20 outline-none focus-visible:ring-2 focus-visible:ring-brand/50 disabled:cursor-not-allowed disabled:bg-elevated disabled:text-text-3 disabled:shadow-none disabled:opacity-60"
+        className="btn-gradient inline-flex w-full min-h-11 items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm shadow-lg shadow-brand/20 outline-none focus-visible:ring-2 focus-visible:ring-brand/50 disabled:cursor-not-allowed disabled:bg-elevated disabled:text-text-3 disabled:shadow-none disabled:opacity-60 sm:w-auto sm:self-end"
       >
         <Sparkles className="h-4 w-4" aria-hidden />
         {loading ? "Analyzing frames..." : "Check Video"}

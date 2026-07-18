@@ -28,7 +28,7 @@ export default function TabSwitcher({ tabs, activeTab, onChange }: TabSwitcherPr
     <div
       role="tablist"
       aria-label="Detection type"
-      className="tab-glass flex w-full gap-1 rounded-full p-1.5 sm:inline-flex sm:w-auto"
+      className="tab-glass flex w-full gap-1 rounded-full p-1 sm:inline-flex sm:w-auto sm:p-1.5"
     >
       {tabs.map((tab) => {
         const Icon = TAB_ICONS[tab.id];
@@ -42,7 +42,7 @@ export default function TabSwitcher({ tabs, activeTab, onChange }: TabSwitcherPr
             aria-selected={isActive}
             onClick={() => onChange(tab.id)}
             className={clsx(
-              "relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium outline-none transition-colors duration-200 sm:flex-none sm:px-5",
+              "relative flex min-h-11 flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-full px-2 py-2.5 text-xs font-medium outline-none transition-colors duration-200 sm:flex-none sm:gap-1.5 sm:px-5 sm:text-sm",
               "focus-visible:ring-2 focus-visible:ring-brand/50",
               isActive ? "text-text" : "text-text-2 hover:text-[var(--tab-hover-text)]"
             )}
@@ -55,7 +55,7 @@ export default function TabSwitcher({ tabs, activeTab, onChange }: TabSwitcherPr
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
               />
             )}
-            <Icon className="relative z-10 h-4 w-4" aria-hidden />
+            <Icon className="relative z-10 h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" aria-hidden />
             <span className="relative z-10">{tab.label}</span>
           </button>
         );

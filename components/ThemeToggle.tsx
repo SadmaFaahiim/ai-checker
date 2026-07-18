@@ -13,7 +13,7 @@ export default function ThemeToggle() {
       type="button"
       onClick={toggleTheme}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      className="glass-card flex h-10 w-10 items-center justify-center rounded-full text-text-2 transition-[color,box-shadow] hover:text-text hover:shadow-[0_0_16px_-2px_rgba(91,140,255,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50"
+      className="glass-card flex h-11 w-11 items-center justify-center rounded-full text-text-2 transition-[color,box-shadow] hover:text-text hover:shadow-[0_0_16px_-2px_rgba(91,140,255,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50"
     >
       <AnimatePresence mode="wait" initial={false}>
         <motion.span

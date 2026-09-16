@@ -3,6 +3,7 @@ import { detectWithFallback } from "@/lib/fallback";
 import { sightengineImageProvider } from "@/lib/providers/image/sightengine";
 import { aiOrNotImageProvider } from "@/lib/providers/image/aiornot";
 import { toVerdict } from "@/lib/scoring";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -10,6 +11,9 @@ const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png"]);
 
 export async function POST(req: NextRequest) {
+  const limited = checkRateLimit("image", req);
+  if (limited) return limited;
+
   let formData: FormData;
   try {
     formData = await req.formData();

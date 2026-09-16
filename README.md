@@ -15,6 +15,7 @@ AI-Checker is a proof-of-concept web application that estimates the likelihood t
 - [Environment Variables](#environment-variables)
 - [Provider Configuration](#provider-configuration)
 - [API Endpoints](#api-endpoints)
+- [Roadmap](#roadmap)
 - [Fallback Architecture](#fallback-architecture)
 - [Verdict Buckets](#verdict-buckets)
 - [Usage Guide](#usage-guide)
@@ -27,9 +28,11 @@ AI-Checker is a proof-of-concept web application that estimates the likelihood t
 
 ## Features
 
-- **Multi-modal detection** — analyze text, images (JPG/PNG), or video (MP4) from a single unified interface.
+- **Multi-modal detection** — analyze text, images (JPG/PNG), audio (MP3/WAV/M4A/OGG/FLAC/WEBM), or video (MP4) from a single unified interface.
 - **Unified output format** — every modality returns the same shape: a 0–100 percentage plus a verdict bucket (`Likely Human`, `Uncertain`, `Likely AI-generated`), never a bare yes/no.
 - **Provider fallback chain** — each modality has an ordered list of detection providers; if the primary provider fails (rate limit, bad key, timeout, 5xx), the backend automatically retries the next one with no user-facing interruption.
+- **Provider health reporting** — a `GET /api/health` endpoint reports which provider credentials are configured, designed for uptime monitors without burning vendor quota.
+- **Rate limiting** — per-modality sliding-window caps (text 20/min, image 10/min, audio 6/min, video 4/min) return `429` with a `Retry-After` header.
 - **Video frame analysis** — samples up to 8 evenly-spaced frames from an uploaded video via FFmpeg, scores each one independently, and renders a per-frame timeline chart alongside the overall score.
 - **Dark/Light theme** — respects the system color-scheme preference on first load and persists a manual override via a toggle in the header.
 - **Animated result card** — an eased count-up percentage, a gradient progress bar (green → amber → red), and provider attribution, all driven by Framer Motion.
@@ -47,7 +50,8 @@ AI-Checker is a proof-of-concept web application that estimates the likelihood t
 │  Client UI  │ ──▶ │   API Routes      │ ──▶ │  detectWithFallback   │
 │ (Check      │     │  /api/check/text  │     │  (lib/fallback.ts)    │
 │  Panels)    │ ◀── │  /api/check/image │ ◀── │                       │
-└─────────────┘     │  /api/check/video │     └───────────┬───────────┘
+└─────────────┘     │  /api/check/audio │     └───────────┬───────────┘
+                    │  /api/check/video │                 │
                      └──────────────────┘                 │
                                               ┌────────────┼────────────┐
                                               ▼            ▼            ▼
@@ -90,14 +94,17 @@ ai-checker/
 │   ├── page.tsx                     # Main page — hero section, tab-based UI, panel switching
 │   ├── globals.css                  # Global styles — CSS custom properties, theme colors, keyframe animations
 │   └── api/
+│       ├── health/route.ts          # GET /api/health — provider configuration status
 │       └── check/
 │           ├── text/route.ts        # POST /api/check/text — text detection endpoint
 │           ├── image/route.ts       # POST /api/check/image — image detection endpoint
+│           ├── audio/route.ts       # POST /api/check/audio — audio detection endpoint
 │           └── video/route.ts       # POST /api/check/video — video detection with frame extraction
 ├── components/
 │   ├── TabSwitcher.tsx               # Segmented tab control with an animated sliding active indicator
 │   ├── TextCheckPanel.tsx            # Text input panel — textarea, live character count, client-side validation
 │   ├── ImageCheckPanel.tsx           # Image upload panel — drag-and-drop, thumbnail preview, size/type validation
+│   ├── AudioCheckPanel.tsx           # Audio upload panel — drag-and-drop, format/size validation
 │   ├── VideoCheckPanel.tsx           # Video upload panel — MP4 only, duration/size validation
 │   ├── ResultCard.tsx                # Shared result display — animated percentage counter, gradient progress bar, verdict badge
 │   ├── FrameTimelineChart.tsx        # Per-frame score timeline — Recharts line chart with a custom tooltip
@@ -106,9 +113,14 @@ ai-checker/
 ├── lib/
 │   ├── fallback.ts                   # Provider fallback orchestrator — sequential retry with an 8s per-provider timeout
 │   ├── scoring.ts                    # Score normalization — maps a 0–100 percentage to a verdict bucket
+│   ├── health.ts                     # Provider status report — env-key presence for /api/health
+│   ├── rateLimit.ts                  # In-memory sliding-window rate limiter — per-modality caps
 │   ├── videoFrames.ts                # FFmpeg utility — extracts evenly-spaced JPEG frames from an uploaded video
 │   └── providers/
 │       ├── types.ts                  # Shared interfaces — Provider, DetectionResult, ProviderInput, ProviderUnavailableError
+│       ├── audio/
+│       │   ├── sightengine.ts        # Sightengine audio detector — primary audio provider (shared credentials with image)
+│       │   └── aiornot.ts            # AI or Not audio detector — stubbed; no confirmed public API
 │       ├── text/
 │       │   ├── sapling.ts            # Sapling AI detector — primary text provider (free tier)
 │       │   ├── gptzero.ts            # GPTZero detector — text fallback (requires a paid subscription)
@@ -181,7 +193,7 @@ Navigate to [http://localhost:3000](http://localhost:3000).
 
 ### 6. Verify the Setup
 
-You should see the AI-Checker landing page with three tabs — **Text**, **Image**, and **Video** — and a theme toggle in the top-right corner. Paste a sentence or two into the Text tab and click **Check Text**; a result card with a percentage and verdict confirms your Sapling API key is configured correctly. If you see a "temporarily unavailable" toast instead, double-check the key in `.env.local` and restart the dev server (environment variables are only read at process start).
+You should see the AI-Checker landing page with four tabs — **Text**, **Image**, **Audio**, and **Video** — and a theme toggle in the top-right corner. Paste a sentence or two into the Text tab and click **Check Text**; a result card with a percentage and verdict confirms your Sapling API key is configured correctly. If you see a "temporarily unavailable" toast instead, double-check the key in `.env.local` and restart the dev server (environment variables are only read at process start).
 
 ---
 
@@ -221,6 +233,12 @@ AIORNOT_API_KEY=
 
 ---
 
+## Roadmap
+
+The project roadmap — role-wise ownership matrix (CEO → CTO → … → Interns + parallel specialist teams), phased timeline, KPIs, and risk register — lives in [ROADMAP.md](./ROADMAP.md). The Phase 1 (Hardening) working task board lives in [TASKS.md](./TASKS.md).
+
+---
+
 ## Provider Configuration
 
 ### Text Detection
@@ -236,6 +254,15 @@ AIORNOT_API_KEY=
 | Priority | Provider | Endpoint | Status | Free Tier | Docs |
 |---|---|---|---|---|---|
 | 1 | Sightengine | `api.sightengine.com/1.0/check.json` | Active | 2,000 ops/month | [sightengine.com/docs](https://sightengine.com/docs/ai-generated-image-detection) |
+| 2 | AI or Not | — | Stubbed | No confirmed public API | — |
+
+### Audio Detection
+
+Audio detection reuses the Sightengine credentials shared with image detection.
+
+| Priority | Provider | Endpoint | Status | Free Tier | Docs |
+|---|---|---|---|---|---|
+| 1 | Sightengine | `api.sightengine.com/1.0/audio/check.json` | Active | Shared 2,000 ops/month | [sightengine.com/docs](https://sightengine.com/docs/) |
 | 2 | AI or Not | — | Stubbed | No confirmed public API | — |
 
 ### Video Detection
@@ -254,7 +281,9 @@ No changes to the orchestrator, the API route's response shape, or the frontend 
 
 ## API Endpoints
 
-All three endpoints run on the Node.js runtime (`export const runtime = "nodejs"`), which is required for the FFmpeg-based video route and kept consistent across all three for uniformity.
+All detection endpoints run on the Node.js runtime (`export const runtime = "nodejs"`), which is required for the FFmpeg-based video route and kept consistent across the check routes for uniformity.
+
+Every check endpoint is rate-limited per client IP — text 20/min, image 10/min, audio 6/min, video 4/min. Exceeding the cap returns `429` with a `Retry-After` header.
 
 ### POST `/api/check/text`
 
@@ -315,6 +344,34 @@ curl -X POST http://localhost:3000/api/check/image \
   -F "image=@/path/to/image.jpg"
 ```
 
+### POST `/api/check/audio`
+
+Analyzes an uploaded audio file (max 20MB).
+
+**Request body** (`multipart/form-data`): a single field named `audio`.
+
+**Success response** (`200`):
+
+```json
+{
+  "percentage": 23,
+  "verdict": "Likely Human",
+  "provider": "sightengine"
+}
+```
+
+**Error responses:**
+- `400` — no file provided, unsupported MIME type, or file exceeds 20MB.
+- `429` — rate limit exceeded for this client (`Retry-After` header included).
+- `503` — every configured provider failed.
+
+**Example:**
+
+```bash
+curl -X POST http://localhost:3000/api/check/audio \
+  -F "audio=@/path/to/audio.mp3"
+```
+
 ### POST `/api/check/video`
 
 Analyzes an uploaded MP4 video (max 20MB) by sampling and scoring individual frames.
@@ -341,6 +398,29 @@ Analyzes an uploaded MP4 video (max 20MB) by sampling and scoring individual fra
 ```bash
 curl -X POST http://localhost:3000/api/check/video \
   -F "video=@/path/to/video.mp4"
+```
+
+### GET `/api/health`
+
+Operational status for uptime monitors and ops dashboards. It never calls a vendor API — it only reports which provider credentials are configured in the environment, so it is cheap to poll. Always returns `200`; `status` is `ok` when at least one provider is configured and `degraded` when none are.
+
+**Success response** (`200`):
+
+```json
+{
+  "status": "ok",
+  "uptimeSeconds": 1204,
+  "timestamp": "2026-09-16T06:30:00.000Z",
+  "providers": [
+    {
+      "id": "sapling",
+      "modality": "text",
+      "role": "fallback",
+      "envKeys": ["SAPLING_API_KEY"],
+      "configured": true
+    }
+  ]
+}
 ```
 
 ---
@@ -417,6 +497,13 @@ These thresholds are defined in a single place — `toVerdict()` in `lib/scoring
 4. A thumbnail preview appears once a valid file is selected. Click **Check Image** to submit it.
 5. The result card displays the percentage and verdict, identical in shape to the text result.
 
+### Audio
+
+1. Select the **Audio** tab.
+2. Drag and drop an audio file onto the upload area, or click it to open a file picker. Accepted formats: MP3, WAV, M4A, OGG, FLAC, WEBM.
+3. **Limit:** 20MB max.
+4. Click **Check Audio**. The result card displays the percentage and verdict, identical in shape to the text and image results.
+
 ### Video
 
 1. Select the **Video** tab.
@@ -436,6 +523,15 @@ These thresholds are defined in a single place — `toVerdict()` in `lib/scoring
 ```bash
 npx tsc --noEmit
 ```
+
+### Testing
+
+```bash
+npm test          # run the Vitest suite once (CI mode)
+npm run test:watch  # watch mode for local development
+```
+
+Unit tests cover the fallback orchestrator (`lib/fallback.ts`), verdict scoring (`lib/scoring.ts`), and the provider adapters with mocked HTTP — no real provider calls are made.
 
 ### Linting
 

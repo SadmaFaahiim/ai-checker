@@ -3,6 +3,7 @@ import { detectWithFallback } from "@/lib/fallback";
 import { sightengineAudioProvider } from "@/lib/providers/audio/sightengine";
 import { aiOrNotAudioProvider } from "@/lib/providers/audio/aiornot";
 import { toVerdict } from "@/lib/scoring";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -17,6 +18,9 @@ const ALLOWED_MIME_TYPES = new Set([
 ]);
 
 export async function POST(req: NextRequest) {
+  const limited = checkRateLimit("audio", req);
+  if (limited) return limited;
+
   let formData: FormData;
   try {
     formData = await req.formData();

@@ -8,6 +8,7 @@ import { detectWithFallback } from "@/lib/fallback";
 import { sightengineImageProvider } from "@/lib/providers/image/sightengine";
 import { aiOrNotImageProvider } from "@/lib/providers/image/aiornot";
 import { toVerdict } from "@/lib/scoring";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -16,6 +17,9 @@ const ALLOWED_MIME_TYPES = new Set(["video/mp4"]);
 const FRAME_SAMPLE_COUNT = 8;
 
 export async function POST(req: NextRequest) {
+  const limited = checkRateLimit("video", req);
+  if (limited) return limited;
+
   let formData: FormData;
   try {
     formData = await req.formData();

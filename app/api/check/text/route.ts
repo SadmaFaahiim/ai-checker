@@ -5,6 +5,7 @@ import { gptZeroProvider } from "@/lib/providers/text/gptzero";
 import { saplingProvider } from "@/lib/providers/text/sapling";
 import { zeroGptProvider } from "@/lib/providers/text/zerogpt";
 import { toVerdict } from "@/lib/scoring";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -13,6 +14,9 @@ const requestSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const limited = checkRateLimit("text", req);
+  if (limited) return limited;
+
   let body: unknown;
   try {
     body = await req.json();

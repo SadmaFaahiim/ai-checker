@@ -45,3 +45,10 @@ next-env.d.ts
 .claude/
 AGENTS.md
 CLAUDE.md
+
+# local agent workspace (not part of the project)
+.freebuff/
+
+# internal product docs & working assets — kept locally, not published
+# (screenshots for the README live in docs/screenshots/)
+Documents/

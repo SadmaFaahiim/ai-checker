@@ -33,6 +33,7 @@ AI-Checker is a proof-of-concept web application that estimates the likelihood t
 - **Provider fallback chain** — each modality has an ordered list of detection providers; if the primary provider fails (rate limit, bad key, timeout, 5xx), the backend automatically retries the next one with no user-facing interruption.
 - **Provider health reporting** — a `GET /api/health` endpoint reports which provider credentials are configured, designed for uptime monitors without burning vendor quota.
 - **Rate limiting** — per-modality sliding-window caps (text 20/min, image 10/min, audio 6/min, video 4/min) return `429` with a `Retry-After` header.
+- **Server-side file validation** — every upload is verified by magic bytes (the actual file signature), not just the client-declared MIME type, so renamed or spoofed payloads are rejected with a `400` before any provider call.
 - **Video frame analysis** — samples up to 8 evenly-spaced frames from an uploaded video via FFmpeg, scores each one independently, and renders a per-frame timeline chart alongside the overall score.
 - **Dark/Light theme** — respects the system color-scheme preference on first load and persists a manual override via a toggle in the header.
 - **Animated result card** — an eased count-up percentage, a gradient progress bar (green → amber → red), and provider attribution, all driven by Framer Motion.
@@ -115,6 +116,7 @@ ai-checker/
 │   ├── scoring.ts                    # Score normalization — maps a 0–100 percentage to a verdict bucket
 │   ├── health.ts                     # Provider status report — env-key presence for /api/health
 │   ├── rateLimit.ts                  # In-memory sliding-window rate limiter — per-modality caps
+│   ├── magicBytes.ts                 # Server-side upload validation — magic-byte signature sniffing
 │   ├── videoFrames.ts                # FFmpeg utility — extracts evenly-spaced JPEG frames from an uploaded video
 │   └── providers/
 │       ├── types.ts                  # Shared interfaces — Provider, DetectionResult, ProviderInput, ProviderUnavailableError
@@ -285,6 +287,8 @@ All detection endpoints run on the Node.js runtime (`export const runtime = "nod
 
 Every check endpoint is rate-limited per client IP — text 20/min, image 10/min, audio 6/min, video 4/min. Exceeding the cap returns `429` with a `Retry-After` header.
 
+Upload endpoints are additionally validated server-side by magic bytes: the actual file signature must match the declared MIME type, otherwise the request is rejected with `400` before any provider is called.
+
 ### POST `/api/check/text`
 
 Analyzes a block of text for AI-generation likelihood.
@@ -334,7 +338,7 @@ Analyzes an uploaded JPG or PNG image (max 10MB).
 ```
 
 **Error responses:**
-- `400` — no file provided, unsupported MIME type, or file exceeds 10MB.
+- `400` — no file provided, unsupported MIME type, file exceeds 10MB, or the file bytes don't match the declared type (magic-byte validation).
 - `503` — every configured provider failed.
 
 **Example:**
@@ -361,7 +365,7 @@ Analyzes an uploaded audio file (max 20MB).
 ```
 
 **Error responses:**
-- `400` — no file provided, unsupported MIME type, or file exceeds 20MB.
+- `400` — no file provided, unsupported MIME type, file exceeds 20MB, or the file bytes don't match the declared type (magic-byte validation).
 - `429` — rate limit exceeded for this client (`Retry-After` header included).
 - `503` — every configured provider failed.
 
@@ -390,7 +394,7 @@ Analyzes an uploaded MP4 video (max 20MB) by sampling and scoring individual fra
 ```
 
 **Error responses:**
-- `400` — no file provided, unsupported MIME type, file exceeds 20MB, or the video could not be read/decoded by FFmpeg.
+- `400` — no file provided, unsupported MIME type, file exceeds 20MB, the file bytes don't match the declared type (magic-byte validation), or the video could not be read/decoded by FFmpeg.
 - `503` — every configured provider failed for the sampled frames.
 
 **Example:**

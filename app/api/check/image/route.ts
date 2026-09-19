@@ -4,6 +4,7 @@ import { sightengineImageProvider } from "@/lib/providers/image/sightengine";
 import { aiOrNotImageProvider } from "@/lib/providers/image/aiornot";
 import { toVerdict } from "@/lib/scoring";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { validateMagicBytes } from "@/lib/magicBytes";
 
 export const runtime = "nodejs";
 
@@ -42,6 +43,12 @@ export async function POST(req: NextRequest) {
 
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Server-side content sniffing: reject spoofed MIME before any provider call (R3).
+    const magic = validateMagicBytes(buffer, file.type);
+    if (!magic.ok) {
+      return NextResponse.json({ error: magic.reason }, { status: 400 });
+    }
 
     const result = await detectWithFallback(
       [sightengineImageProvider, aiOrNotImageProvider],

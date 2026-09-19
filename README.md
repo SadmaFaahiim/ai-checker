@@ -244,7 +244,7 @@ NEXT_PUBLIC_SENTRY_DSN=
 
 ## Roadmap
 
-The project roadmap — role-wise ownership matrix (CEO → CTO → … → Interns + parallel specialist teams), phased timeline, KPIs, and risk register — lives in [ROADMAP.md](./ROADMAP.md). The Phase 1 (Hardening) working task board lives in [TASKS.md](./TASKS.md).
+The project roadmap — role-wise ownership matrix (CEO → CTO → … → Interns + parallel specialist teams), phased timeline, KPIs, and risk register — lives in [ROADMAP.md](./ROADMAP.md). The Phase 1 (Hardening) working task board lives in [TASKS.md](./TASKS.md). The benchmark corpus specification (how detection quality is measured: corpus composition, labeling, metrics, thresholds) lives in [BENCHMARK.md](./BENCHMARK.md).
 
 ---
 

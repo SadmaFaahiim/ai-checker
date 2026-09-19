@@ -25,7 +25,7 @@
 | T5 | Route integration tests — `/api/check/*` | QA | P1 | 400 paths (validation), 200 happy path shape `{ percentage, verdict, provider }`, 503 when all providers fail; providers mocked |
 | T6 | Coverage config + threshold (≥60% on `lib/`) | Tech Lead | P2 | `vitest run --coverage` enforces the roadmap KPI |
 
-**Status:** T1–T4 landed in this PR; T6 landed via the coverage-gate PR (`@vitest/coverage-v8`, 60% thresholds on lines/branches/functions/statements scoped to `lib/`, wired into CI). T5–open. Known gap: audio provider adapters currently at 0% coverage — queued as a QA follow-up.
+**Status:** T1–T4 landed in this PR; T6 landed via the coverage-gate PR (`@vitest/coverage-v8`, 60% thresholds on lines/branches/functions/statements scoped to `lib/`, wired into CI). T5–open (route-integration tests). The audio-adapter coverage gap is closed — `lib/providers/audio/*` now at 100% lines.
 
 ---
 

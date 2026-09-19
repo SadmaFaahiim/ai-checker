@@ -537,7 +537,7 @@ npm run test:watch     # watch mode for local development
 npm run test:coverage  # run tests with coverage; fails below the 60% threshold
 ```
 
-Unit tests cover the fallback orchestrator (`lib/fallback.ts`), verdict scoring (`lib/scoring.ts`), upload validation (`lib/magicBytes.ts`), rate limiting (`lib/rateLimit.ts`), the health registry (`lib/health.ts`), and the provider adapters with mocked HTTP — no real provider calls are made.
+Unit tests cover the fallback orchestrator (`lib/fallback.ts`), verdict scoring (`lib/scoring.ts`), upload validation (`lib/magicBytes.ts`), rate limiting (`lib/rateLimit.ts`), the health registry (`lib/health.ts`), and the provider adapters — text, image and audio — with mocked HTTP — no real provider calls are made.
 
 Coverage is measured with `@vitest/coverage-v8`, scoped to `lib/` (test files and pure-type modules excluded). A **60% minimum** on lines, branches, functions and statements is enforced in `vitest.config.ts` — the run (and CI) fails below it. The suite currently sits around **77%**.
 

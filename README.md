@@ -32,7 +32,7 @@ AI-Checker is a proof-of-concept web application that estimates the likelihood t
 - **Unified output format** — every modality returns the same shape: a 0–100 percentage plus a verdict bucket (`Likely Human`, `Uncertain`, `Likely AI-generated`), never a bare yes/no.
 - **Provider fallback chain** — each modality has an ordered list of detection providers; if the primary provider fails (rate limit, bad key, timeout, 5xx), the backend automatically retries the next one with no user-facing interruption.
 - **Provider health reporting** — a `GET /api/health` endpoint reports which provider credentials are configured, designed for uptime monitors without burning vendor quota.
-- **Rate limiting** — per-modality sliding-window caps (text 20/min, image 10/min, audio 6/min, video 4/min) return `429` with a `Retry-After` header.
+- **Rate limiting** — per-modality sliding-window caps (text 20/min, image 10/min, audio 6/min, video 4/min) return `429` with a `Retry-After` header. The store is size-capped with periodic sweeping (bounded memory under IP churn), and client IPs are one-way HMAC-hashed before they touch rate-limit keys or logs — raw IPs are never persisted (GDPR).
 - **Server-side file validation** — every upload is verified by magic bytes (the actual file signature), not just the client-declared MIME type, so renamed or spoofed payloads are rejected with a `400` before any provider call.
 - **Video frame analysis** — samples up to 8 evenly-spaced frames from an uploaded video via FFmpeg, scores each one independently, and renders a per-frame timeline chart alongside the overall score.
 - **Dark/Light theme** — respects the system color-scheme preference on first load and persists a manual override via a toggle in the header.
@@ -230,6 +230,7 @@ AIORNOT_API_KEY=
 | `SIGHTENGINE_API_USER` / `SIGHTENGINE_API_SECRET` | Yes (for image/video) | Primary provider for both image and video (video reuses this provider per sampled frame). |
 | `GPTZERO_API_KEY` | No | Kept as a documented fallback for text; requires a paid plan to function. |
 | `AIORNOT_API_KEY` | No | Kept as a documented fallback for images; not wired to a live endpoint (see [Provider Configuration](#provider-configuration)). |
+| `RATE_LIMIT_IP_SECRET` | Recommended | Secret for HMAC-hashing client IPs in the rate limiter. Without it, a process-derived fallback is used (a warning is logged). Set the same value on every instance. |
 
 **Security note:** `.env.local` is listed in `.gitignore` and is never committed to version control. All API keys are read exclusively server-side via `process.env` inside provider modules and route handlers — they are never bundled into client-side JavaScript or exposed to the browser.
 

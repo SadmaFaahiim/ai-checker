@@ -48,7 +48,7 @@
 | R2 | Per-modality caps (video stricter than text) | Backend | P1 | Video route caps lower than text; caps live in one config module |
 | R3 | Magic-byte file validation server-side | Cybersecurity | P1 | Uploads rejected when declared MIME ≠ actual bytes; covers JPG/PNG/audio/MP4 |
 
-**Status:** R1 + R2 landed in this PR (`lib/rateLimit.ts` — in-memory sliding window, per-modality caps text 20/min · image 10/min · audio 6/min · video 4/min, `429` + `Retry-After`, wired into all four check routes ahead of body parsing). R3 landed via the magic-byte-validation PR (`lib/magicBytes.ts` — signature sniffing for JPG/PNG/MP3/WAV/MP4/OGG/FLAC/WebM, wired into all three upload routes before any provider call or disk write).
+**Status:** R1 + R2 landed in this PR (`lib/rateLimit.ts` — in-memory sliding window, per-modality caps text 20/min · image 10/min · audio 6/min · video 4/min, `429` + `Retry-After`, wired into all four check routes ahead of body parsing). R3 landed via the magic-byte-validation PR (`lib/magicBytes.ts` — signature sniffing for JPG/PNG/MP3/WAV/MP4/OGG/FLAC/WebM, wired into all three upload routes before any provider call or disk write). Issue #4 F1/F2 hardening also landed: the store is size-capped (`MAX_TRACKED_CLIENTS`) with periodic stale-sweep + LRU-style eviction, and client IPs are HMAC-SHA256-hashed (`RATE_LIMIT_IP_SECRET`) before use as keys or in logs.
 
 ---
 

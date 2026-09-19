@@ -10,6 +10,7 @@ import { aiOrNotImageProvider } from "@/lib/providers/image/aiornot";
 import { toVerdict } from "@/lib/scoring";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { validateMagicBytes } from "@/lib/magicBytes";
+import { captureServerError } from "@/lib/sentry";
 
 export const runtime = "nodejs";
 
@@ -98,6 +99,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error("[api/check/video] all providers failed:", err);
+    captureServerError(err, { route: "/api/check/video", modality: "video" });
     return NextResponse.json(
       {
         error:

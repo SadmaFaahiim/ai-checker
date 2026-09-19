@@ -71,7 +71,7 @@
 | D1 | ROADMAP.md committed (Phase 0 baseline freeze) | PO/BA | P0 | Roadmap present at repo root; roles/tracks/phases match §2–§4 |
 | D2 | README: document the Audio modality (close the drift flagged in ROADMAP §0) | Docs owner | P1 | README features + endpoints + provider tables include audio; setup guide updated if needed |
 | D3 | README: test commands (`npm test`) documented | Docs owner | P1 | Build & Production section includes test commands |
-| D4 | Benchmark corpus spec defined | PO/BA + Interns | P2 | Corpus source, size, labeling rules, and per-provider metric definitions written down |
+| D4 | Benchmark corpus spec defined | PO/BA + Interns | P2 | Corpus source, size, labeling rules, and per-provider metric definitions written down — landed as [BENCHMARK.md](./BENCHMARK.md) (draft v1, pending PO/BA approval) |
 
 **Status:** D1, D2, D3 landed in this PR (Audio now documented in README — features, endpoints, provider table, usage guide, project structure); D4 open.
 
@@ -86,7 +86,7 @@
 - [x] Error tracking capturing server exceptions — Sentry wired into all check routes (O2; no-op without DSN)
 - [x] Magic-byte validation on all upload routes — `lib/magicBytes.ts` wired into image/audio/video (R3)
 - [x] README documents all four modalities incl. Audio
-- [ ] Benchmark corpus spec approved by PO/BA
+- [ ] Benchmark corpus spec approved by PO/BA — drafted as BENCHMARK.md (D4); approval still pending
 
 ---
 

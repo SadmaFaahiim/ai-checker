@@ -9,6 +9,7 @@ import { sightengineImageProvider } from "@/lib/providers/image/sightengine";
 import { aiOrNotImageProvider } from "@/lib/providers/image/aiornot";
 import { toVerdict } from "@/lib/scoring";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { validateMagicBytes } from "@/lib/magicBytes";
 
 export const runtime = "nodejs";
 
@@ -46,8 +47,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Server-side content sniffing: reject spoofed MIME before any disk/provider work (R3).
+  const fileBuffer = Buffer.from(await file.arrayBuffer());
+  const magic = validateMagicBytes(fileBuffer, file.type);
+  if (!magic.ok) {
+    return NextResponse.json({ error: magic.reason }, { status: 400 });
+  }
+
   const tmpPath = path.join(os.tmpdir(), `${Date.now()}-${randomUUID()}.mp4`);
-  await fs.writeFile(tmpPath, Buffer.from(await file.arrayBuffer()));
+  await fs.writeFile(tmpPath, fileBuffer);
 
   try {
     let frames: Buffer[];

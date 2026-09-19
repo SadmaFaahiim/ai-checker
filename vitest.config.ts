@@ -4,7 +4,7 @@ import path from "node:path";
 export default defineConfig({
   test: {
     environment: "node",
-    include: ["lib/**/*.test.ts"],
+    include: ["lib/**/*.test.ts", "app/**/*.test.ts"],
     testTimeout: 10_000,
     coverage: {
       // Measure only first-party library code (TASKS.md T6 / ROADMAP §5 KPI).

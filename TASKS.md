@@ -60,7 +60,7 @@
 | O2 | Sentry (or equivalent) error tracking | DevOps | P1 | Server-side capture on all routes; source maps uploaded; DSN via env |
 | O3 | Uptime monitoring on `/api/health` | Tech Support | P2 | External checker configured; alert channel chosen |
 
-**Status:** O1 landed in this PR (`lib/health.ts` + `app/api/health/route.ts`). O2, O3 open.
+**Status:** O1 landed in this PR (`lib/health.ts` + `app/api/health/route.ts`). O2 landed via the Sentry PR (`@sentry/nextjs`, server+client init via Next instrumentation hooks, `captureServerError` with route/modality tags wired into all four check routes' 503 paths, source-map upload enabled when `SENTRY_AUTH_TOKEN` is present in CI, fully no-op without a DSN). O3 open.
 
 ---
 
@@ -83,7 +83,7 @@
 - [x] CI green gate on all PRs (lint → typecheck → test → build) — workflow committed
 - [x] Rate limiting active on all `/api/check/*` routes with 429 + `Retry-After`
 - [x] `/api/health` live and monitored — endpoint live; external monitor still open (O3)
-- [ ] Error tracking capturing server exceptions
+- [x] Error tracking capturing server exceptions — Sentry wired into all check routes (O2; no-op without DSN)
 - [x] Magic-byte validation on all upload routes — `lib/magicBytes.ts` wired into image/audio/video (R3)
 - [x] README documents all four modalities incl. Audio
 - [ ] Benchmark corpus spec approved by PO/BA

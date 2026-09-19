@@ -6,6 +6,7 @@ import { saplingProvider } from "@/lib/providers/text/sapling";
 import { zeroGptProvider } from "@/lib/providers/text/zerogpt";
 import { toVerdict } from "@/lib/scoring";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { captureServerError } from "@/lib/sentry";
 
 export const runtime = "nodejs";
 
@@ -48,6 +49,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error("[api/check/text] all providers failed:", err);
+    captureServerError(err, { route: "/api/check/text", modality: "text" });
     return NextResponse.json(
       { error: "Detection is temporarily unavailable, please try again shortly." },
       { status: 503 }

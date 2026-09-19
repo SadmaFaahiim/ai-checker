@@ -239,6 +239,58 @@ describe("sightengineImageProvider (image)", () => {
     expect((err as ProviderUnavailableError).reason).toBe("server error (502)");
   });
 
+  it.each([
+    [429, "quota exceeded"],
+    [401, "invalid API credentials"],
+    [403, "invalid API credentials"],
+  ])("maps HTTP %d to a failover reason: %s", async (status, expected) => {
+    postMock.mockRejectedValue(axiosError(status));
+
+    try {
+      await sightengineImageProvider.detect(imageInput);
+      expect.unreachable("should have thrown");
+    } catch (err) {
+      const providerErr = err as ProviderUnavailableError;
+      expect(providerErr).toBeInstanceOf(ProviderUnavailableError);
+      expect(providerErr.reason).toBe(expected);
+    }
+  });
+
+  it("maps generic axios errors with their message", async () => {
+    postMock.mockRejectedValue(axiosError(undefined, "connect ECONNREFUSED"));
+
+    const err = await sightengineImageProvider.detect(imageInput).catch((e) => e);
+
+    expect(err).toBeInstanceOf(ProviderUnavailableError);
+    expect((err as ProviderUnavailableError).reason).toBe("connect ECONNREFUSED");
+  });
+
+  it("maps non-axios throws with their message", async () => {
+    postMock.mockRejectedValue(new Error("form serialization failed"));
+
+    const err = await sightengineImageProvider.detect(imageInput).catch((e) => e);
+
+    expect(err).toBeInstanceOf(ProviderUnavailableError);
+    expect((err as ProviderUnavailableError).reason).toBe(
+      "form serialization failed"
+    );
+  });
+
+  it("sends the multipart payload with model and credentials", async () => {
+    postMock.mockResolvedValue({ data: { type: { ai_generated: 0.4 } } });
+
+    await sightengineImageProvider.detect(imageInput);
+
+    expect(postMock).toHaveBeenCalledTimes(1);
+    const [url, body] = postMock.mock.calls[0];
+    expect(url).toBe("https://api.sightengine.com/1.0/check.json");
+    const payload = (body as { getBuffer(): Buffer }).getBuffer().toString("latin1");
+    expect(payload).toContain("fake image bytes");
+    expect(payload).toContain("genai");
+    expect(payload).toContain("test-user");
+    expect(payload).toContain("test-secret");
+  });
+
   it("rejects non-image input kinds outright", async () => {
     await expect(sightengineImageProvider.detect(textInput)).rejects.toThrow(
       "sightengine image provider only supports images"

@@ -25,7 +25,7 @@
 | T5 | Route integration tests — `/api/check/*` | QA | P1 | 400 paths (validation), 200 happy path shape `{ percentage, verdict, provider }`, 503 when all providers fail; providers mocked |
 | T6 | Coverage config + threshold (≥60% on `lib/`) | Tech Lead | P2 | `vitest run --coverage` enforces the roadmap KPI |
 
-**Status:** T1–T4 landed in this PR; T5–T6 open.
+**Status:** T1–T4 landed in this PR; T6 landed via the coverage-gate PR (`@vitest/coverage-v8`, 60% thresholds on lines/branches/functions/statements scoped to `lib/`, wired into CI). T5–open. Known gap: audio provider adapters currently at 0% coverage — queued as a QA follow-up.
 
 ---
 
@@ -48,7 +48,7 @@
 | R2 | Per-modality caps (video stricter than text) | Backend | P1 | Video route caps lower than text; caps live in one config module |
 | R3 | Magic-byte file validation server-side | Cybersecurity | P1 | Uploads rejected when declared MIME ≠ actual bytes; covers JPG/PNG/audio/MP4 |
 
-**Status:** R1 + R2 landed in this PR (`lib/rateLimit.ts` — in-memory sliding window, per-modality caps text 20/min · image 10/min · audio 6/min · video 4/min, `429` + `Retry-After`, wired into all four check routes ahead of body parsing). R3 open.
+**Status:** R1 + R2 landed in this PR (`lib/rateLimit.ts` — in-memory sliding window, per-modality caps text 20/min · image 10/min · audio 6/min · video 4/min, `429` + `Retry-After`, wired into all four check routes ahead of body parsing). R3 landed via the magic-byte-validation PR (`lib/magicBytes.ts` — signature sniffing for JPG/PNG/MP3/WAV/MP4/OGG/FLAC/WebM, wired into all three upload routes before any provider call or disk write).
 
 ---
 
@@ -79,12 +79,12 @@
 
 ## Definition of Done — Phase 1 exit gate
 
-- [ ] `npm test` green; coverage ≥ 60% on `lib/` (KPI from ROADMAP §5) — suite green (45 tests), coverage tooling still open (T6)
+- [x] `npm test` green; coverage ≥ 60% on `lib/` (KPI from ROADMAP §5) — 82 tests green, coverage gate enforced at 60% (current: ~77%, T6)
 - [x] CI green gate on all PRs (lint → typecheck → test → build) — workflow committed
 - [x] Rate limiting active on all `/api/check/*` routes with 429 + `Retry-After`
 - [x] `/api/health` live and monitored — endpoint live; external monitor still open (O3)
 - [ ] Error tracking capturing server exceptions
-- [ ] Magic-byte validation on all upload routes
+- [x] Magic-byte validation on all upload routes — `lib/magicBytes.ts` wired into image/audio/video (R3)
 - [x] README documents all four modalities incl. Audio
 - [ ] Benchmark corpus spec approved by PO/BA
 

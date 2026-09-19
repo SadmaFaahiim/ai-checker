@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getHealthReport, getProviderStatus } from "@/lib/health";
+import { ALL_CHAINS } from "@/lib/providers/chains";
 
 beforeEach(() => {
   vi.unstubAllEnvs();
@@ -47,6 +48,40 @@ describe("getProviderStatus", () => {
       "image",
       "video",
     ]);
+  });
+
+  it("covers every provider in the chains registry — no silent misses (issue #4 / F3)", () => {
+    const expected = Object.entries(ALL_CHAINS).flatMap(([modality, chain]) =>
+      chain.map((entry) => ({ id: entry.provider.name, modality }))
+    );
+    const actual = getProviderStatus().map((p) => ({
+      id: p.id,
+      modality: p.modality,
+    }));
+
+    expect(actual).toEqual(expected);
+  });
+
+  it("matches each provider's role from the chains registry", () => {
+    const rolesByChain = Object.entries(ALL_CHAINS).flatMap(
+      ([modality, chain]) =>
+        chain.map((entry) => ({
+          id: entry.provider.name,
+          modality,
+          role: entry.role,
+        }))
+    );
+    const statuses = new Map(
+      getProviderStatus().map((p) => [`${p.id}:${p.modality}`, p.role])
+    );
+
+    for (const { id, modality, role } of rolesByChain) {
+      expect(statuses.get(`${id}:${modality}`)).toBe(role);
+    }
+    // The route chain tries Sapling first — the report must say so too
+    // (regression guard for the drift this issue fixed).
+    expect(statuses.get("sapling:text")).toBe("primary");
+    expect(statuses.get("gptzero:text")).toBe("fallback");
   });
 
   it("never reports stubs as configured", () => {

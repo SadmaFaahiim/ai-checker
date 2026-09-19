@@ -60,7 +60,7 @@
 | O2 | Sentry (or equivalent) error tracking | DevOps | P1 | Server-side capture on all routes; source maps uploaded; DSN via env |
 | O3 | Uptime monitoring on `/api/health` | Tech Support | P2 | External checker configured; alert channel chosen |
 
-**Status:** O1 landed in this PR (`lib/health.ts` + `app/api/health/route.ts`). O2 landed via the Sentry PR (`@sentry/nextjs`, server+client init via Next instrumentation hooks, `captureServerError` with route/modality tags wired into all four check routes' 503 paths, source-map upload enabled when `SENTRY_AUTH_TOKEN` is present in CI, fully no-op without a DSN). O3 open.
+**Status:** O1 landed in this PR (`lib/health.ts` + `app/api/health/route.ts`). O2 landed via the Sentry PR (`@sentry/nextjs`, server+client init via Next instrumentation hooks, `captureServerError` with route/modality tags wired into all four check routes' 503 paths, source-map upload enabled when `SENTRY_AUTH_TOKEN` is present in CI, fully no-op without a DSN). O3 open. Issue #4 / F3 also landed: provider chains now live in `lib/providers/chains.ts` as the single source of truth — routes import `TEXT_PROVIDERS`/`IMAGE_PROVIDERS`/`AUDIO_PROVIDERS` and the health report derives roles, env keys and notes from the same entries (also fixed the health report calling GPTZero "primary" when routes try Sapling first).
 
 ---
 

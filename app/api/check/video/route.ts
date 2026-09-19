@@ -5,8 +5,7 @@ import path from "path";
 import { randomUUID } from "crypto";
 import { extractFrames } from "@/lib/videoFrames";
 import { detectWithFallback } from "@/lib/fallback";
-import { sightengineImageProvider } from "@/lib/providers/image/sightengine";
-import { aiOrNotImageProvider } from "@/lib/providers/image/aiornot";
+import { IMAGE_PROVIDERS } from "@/lib/providers/chains";
 import { toVerdict } from "@/lib/scoring";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { validateMagicBytes } from "@/lib/magicBytes";
@@ -79,7 +78,7 @@ export async function POST(req: NextRequest) {
 
     const frameResults = await Promise.all(
       frames.map((buffer) =>
-        detectWithFallback([sightengineImageProvider, aiOrNotImageProvider], {
+        detectWithFallback(IMAGE_PROVIDERS, {
           kind: "image",
           buffer,
           mimeType: "image/jpeg",

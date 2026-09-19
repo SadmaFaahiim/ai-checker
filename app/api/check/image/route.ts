@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { detectWithFallback } from "@/lib/fallback";
-import { sightengineImageProvider } from "@/lib/providers/image/sightengine";
-import { aiOrNotImageProvider } from "@/lib/providers/image/aiornot";
+import { IMAGE_PROVIDERS } from "@/lib/providers/chains";
 import { toVerdict } from "@/lib/scoring";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { validateMagicBytes } from "@/lib/magicBytes";
@@ -51,10 +50,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: magic.reason }, { status: 400 });
     }
 
-    const result = await detectWithFallback(
-      [sightengineImageProvider, aiOrNotImageProvider],
-      { kind: "image", buffer, mimeType: file.type }
-    );
+    const result = await detectWithFallback(IMAGE_PROVIDERS, {
+      kind: "image",
+      buffer,
+      mimeType: file.type,
+    });
 
     const percentage = Math.round(result.aiProbability * 100);
 

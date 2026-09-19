@@ -1,6 +1,12 @@
 /**
  * Health reporting for /api/health.
  *
+ * The report is **derived from the provider chains registry**
+ * (lib/providers/chains.ts) — the same single source of truth the API
+ * routes use to build their fallback chains (issue #4 / F3). A provider
+ * added to a chain automatically appears here with the right env keys and
+ * role; nothing can drift.
+ *
  * Reads only the *presence* of provider credentials in the environment —
  * no vendor API calls are made, so the endpoint is cheap and safe to poll
  * from uptime monitors. A missing key is not an error: the fallback chain
@@ -8,9 +14,10 @@
  * "stubbed" instead of failing.
  */
 
-export type ProviderRole = "primary" | "fallback" | "stub";
+import { ALL_CHAINS } from "./providers/chains";
+import type { ProviderModality } from "./providers/chains";
 
-export type ProviderModality = "text" | "image" | "audio" | "video";
+export type ProviderRole = "primary" | "fallback" | "stub";
 
 export interface ProviderStatus {
   id: string;
@@ -31,71 +38,28 @@ function hasEnv(...keys: string[]): boolean {
 }
 
 export function getProviderStatus(): ProviderStatus[] {
-  const sightengineKeys = ["SIGHTENGINE_API_USER", "SIGHTENGINE_API_SECRET"];
-  const sightengineConfigured = hasEnv(...sightengineKeys);
+  const statuses: ProviderStatus[] = [];
 
-  return [
-    {
-      id: "gptzero",
-      modality: "text",
-      role: "primary",
-      envKeys: ["GPTZERO_API_KEY"],
-      configured: hasEnv("GPTZERO_API_KEY"),
-    },
-    {
-      id: "sapling",
-      modality: "text",
-      role: "fallback",
-      envKeys: ["SAPLING_API_KEY"],
-      configured: hasEnv("SAPLING_API_KEY"),
-    },
-    {
-      id: "zerogpt",
-      modality: "text",
-      role: "stub",
-      envKeys: [],
-      configured: false,
-      note: "Stubbed — no documented authenticated API; always fails over.",
-    },
-    {
-      id: "sightengine",
-      modality: "image",
-      role: "primary",
-      envKeys: sightengineKeys,
-      configured: sightengineConfigured,
-    },
-    {
-      id: "sightengine",
-      modality: "audio",
-      role: "primary",
-      envKeys: sightengineKeys,
-      configured: sightengineConfigured,
-    },
-    {
-      id: "sightengine-frames",
-      modality: "video",
-      role: "primary",
-      envKeys: sightengineKeys,
-      configured: sightengineConfigured,
-      note: "Video reuses the Sightengine image provider per sampled frame.",
-    },
-    {
-      id: "aiornot",
-      modality: "image",
-      role: "stub",
-      envKeys: [],
-      configured: false,
-      note: "Stubbed — no confirmed authenticated API; always fails over.",
-    },
-    {
-      id: "aiornot-audio",
-      modality: "audio",
-      role: "stub",
-      envKeys: [],
-      configured: false,
-      note: "Stubbed — no confirmed authenticated audio API; always fails over.",
-    },
-  ];
+  for (const [modality, chain] of Object.entries(ALL_CHAINS) as [
+    ProviderModality,
+    typeof ALL_CHAINS[ProviderModality],
+  ][]) {
+    for (const entry of chain) {
+      statuses.push({
+        id: entry.provider.name,
+        modality,
+        role: entry.role,
+        envKeys: entry.requiredEnvKeys,
+        configured:
+          entry.role === "stub"
+            ? false
+            : hasEnv(...entry.requiredEnvKeys),
+        ...(entry.note ? { note: entry.note } : {}),
+      });
+    }
+  }
+
+  return statuses;
 }
 
 export interface HealthReport {

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { detectWithFallback } from "@/lib/fallback";
-import { sightengineAudioProvider } from "@/lib/providers/audio/sightengine";
-import { aiOrNotAudioProvider } from "@/lib/providers/audio/aiornot";
+import { AUDIO_PROVIDERS } from "@/lib/providers/chains";
 import { toVerdict } from "@/lib/scoring";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { validateMagicBytes } from "@/lib/magicBytes";
@@ -58,10 +57,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: magic.reason }, { status: 400 });
     }
 
-    const result = await detectWithFallback(
-      [sightengineAudioProvider, aiOrNotAudioProvider],
-      { kind: "audio", buffer, mimeType: file.type }
-    );
+    const result = await detectWithFallback(AUDIO_PROVIDERS, {
+      kind: "audio",
+      buffer,
+      mimeType: file.type,
+    });
 
     const percentage = Math.round(result.aiProbability * 100);
 
